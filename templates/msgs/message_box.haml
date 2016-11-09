@@ -1,0 +1,306 @@
+{% extends "smartmin/list.html" %}
+-load smartmin sms temba compress contacts
+-load i18n humanize
+
+-block page-top
+  {% render as page_top %}
+    {{block.super}}
+  {% endrender %}
+  -if has_messages
+    {{page_top}}
+
+-block title-icon
+  %span.title-icon
+    .glyph.icon-inbox
+
+-block above-bar
+  -block top-form
+    %form{method:"get"}
+      %input.input-medium.search-query{type:'text', placeholder:'{% trans "Search" %}', name:"search", value:"{{search}}"}
+
+-block content
+
+  #numeric-form.hide
+    %form
+      %label
+        -trans "Numeric Value:"
+      %input#number{type:"text"}
+    .error
+
+  #pjax
+    -block pjax
+      .row-fluid
+        .span3.sidebox
+          %div{style:"margin-bottom: 10px"}
+            - if org_perms.msgs.broadcast_send
+              %a.btn.btn-primary.btn-block.send-button
+                -trans "Send Message"
+
+          #sidebar-nav
+            %ul.nav.nav-list.level1
+              %li.nav-header
+                -trans "Messages"
+              - for folder in folders
+                %li{'class': '{% if request.path == folder.url %}active{% endif %}' }
+                  %a{'href':'={folder.url}'}
+                    ={folder.label} ({{ folder.count | intcomma }})
+
+              - if labels
+                %li.nav-header
+                  - trans "Labels"
+                - for node in labels
+                  - if node.is_folder
+                    %li{ class:'{% if current_label.id == node.id %}active{% endif %} lbl-parent {% if current_label.id == node.id or current_label.folder.id == node.id %}expanded{% endif %}' }
+                      %a{'href':'{% url "msgs.msg_filter" node.id %}'}
+                        {{ node.name }}
+                        - if node.children.all
+                          - if current_label.id == node.id or current_label.folder.id == node.id
+                            .glyph.icon-arrow-down-2
+                          -else
+                            .glyph.icon-arrow-right-8
+
+                      %ul.nav.nav-list.level2
+                        - for label in node.children.all
+                          %li{ class:'{% if current_label.id == label.id %}active{% endif %}' }
+                            %a{ href:"{% url 'msgs.msg_filter' label.id %}" }
+                              {{ label.name }} ({{ label.get_visible_count | intcomma }})
+                  - else
+                    %li{ class:'{% if current_label.id == node.id %}active{% endif %}' }
+                      %a{ href:"{% url 'msgs.msg_filter' node.id %}", class:'{% if current_label.id == node.id %}active{% endif %}' }
+                        {{ node.name }} ({{ node.get_visible_count | intcomma }})
+
+          %div{style:"margin-top: 10px"}
+            - if org_perms.msgs.label_create
+              %a.btn.btn-block.add-label
+                - trans "Create Label"
+            - if org_perms.msgs.label_create_folder
+              %a.btn.btn-block.add-folder
+                - trans "Create Folder"
+
+        -if has_messages
+          .span9
+            -block buttons
+              .pull-right
+                -block buttons-right
+                  -block gear-menu
+                    -include "gear_links_include.haml"
+
+              -block search-details
+                .search-details
+                  -if search
+                    -blocktrans count results_count=paginator.count
+                      Found {{ results_count }} message in last 90 days matching <i>{{search}}</i>.
+                      -plural
+                        Found {{ results_count }} messages in last 90 days matching <i>{{search}}</i>.
+
+              -block action-buttons
+                -if org_perms.msgs.msg_update
+                  .list-buttons-container
+                    .list-buttons.hide
+                      - if 'unlabel' in actions
+                        %span.btn-group
+                          %a.object-btn-unlabel{href:'#'}
+                            %button.btn{data-toggle:'tooltip', data-trigger:'hover', data-delay:"800", data-placement:'top', data-original-title:'{% trans "Unlabel" %}'}
+                              .glyph.icon-box
+
+                      - if 'archive' in actions
+                        %span.btn-group
+                          %a.object-btn-archive{href:'#'}
+                            %button.btn{data-toggle:'tooltip', data-trigger:'hover', data-delay:"800", data-placement:'top', data-original-title:'{% trans "Archive" %}'}
+                              .glyph.icon-box
+
+                      - if 'restore' in actions
+                        %span.btn-group
+                          %a.object-btn-restore{href:'#'}
+                            %button.btn{data-toggle:'tooltip', data-trigger:'hover', data-delay:"800", data-placement:'top', data-original-title:'{% trans "Unarchive" %}'}
+                              .glyph.icon-download
+
+                      - if 'delete' in actions
+                        %span.btn-group
+                          %a.object-btn-delete{href:'#'}
+                            %button.btn{data-toggle:'tooltip', data-trigger:'hover', data-delay:"800", data-placement:'top', data-original-title:'{% trans "Delete" %}'}
+                              .glyph.icon-remove
+
+                      - if 'resend' in actions
+                        %span.btn-group
+                          %a.object-btn-resend{href:'#'}
+                            %button.btn{data-toggle:'tooltip', data-trigger:'hover', data-delay:"800", data-placement:'top', data-original-title:'{% trans "Resend" %}'}
+                              .glyph.icon-upload
+
+                      - if 'label' in actions
+                        %span.btn-group
+                          %button.btn.dropdown-toggle{data-toggle:"dropdown", data-trigger:'hover', data-delay:"800", data-placement:'top', data-original-title:'{% trans "Labels" %}'}
+                            .glyph.icon-tag
+                            %span.caret
+                          %ul.dropdown-menu.label-menu{role:'menu', aria-labelledby:'dlabel'}
+                            - for node in labels
+                              - if node.is_folder and node.children.all
+                                %li.dropdown-submenu
+                                  %a.lbl-menu.object-btn-label{href:'#', tabindex:'-1', data-id:'{{node.id}}'}
+                                    {{ node.name }}
+                                  %ul.dropdown-menu.label-menu
+                                    - for label in node.children.all
+                                      %li
+                                        %a.lbl-menu.object-btn-label{href:'#', tabindex:'-1', data-id:'{{label.id}}'}
+                                          .glyph.message-label.label-checkbox
+                                          {{ label.name }}
+                              - elif not node.is_folder
+                                %li
+                                  %a.lbl-menu.object-btn-label{href:'#', tabindex:'-1', data-id:'{{node.id}}'}
+                                    .glyph.message-label.label-checkbox
+                                    {{ node.name }}
+
+                            - if org_perms.msgs.label_create
+                              - if has_labels
+                                %li.divider
+                              %li
+                                %a.lbl-menu.add-label{href:'#'}
+                                  -trans "New Label..."
+
+            -block message-list
+              %table.list-table.sms_list.object-list.table.table-condensed{style: '{% if not org_perms.msgs.msg_update %}margin-top:10px{% endif %}'}
+                %tbody
+                  -for object in object_list
+                    %tr.sms.object-row.select-row{id: 'id-row-{{object.id}}', class:'{% cycle row1 row2 %}{% if object.created_on > msg_last_viewed %}new{% endif %}', data-object-id:'{{ object.id }}',
+                                   data-sender-id:'{{object.contact.id}}', data-sender-uuid:'{{object.contact.uuid}}', data-sender-select2:'{{object.contact|short_name:user_org}}'}
+                      - if actions
+                        - if org_perms.msgs.msg_update or org_perms.msgs.broadcast_send
+                          %td.checkbox.sms.object-row-checkbox
+                            .glyph.object-row-checkbox
+                      %td.value-phone.field_phone
+                        %nobr
+                          {{ object.contact|short_name:user_org }}
+                      %td.value-text.field_text
+                        {% get_value object 'text' %}
+                        .value-labels
+                          - for label in object.labels.all
+                            %span.label.label-info.lbl{ data-id: '{{label.id}}' }
+                              %a{href:"{% url 'msgs.msg_filter' label.pk%}"}
+                                ={label.name}
+
+                          - if object.get_flow_id
+                            %span.label.label-success
+                              %a{href:"{% url 'flows.flow_editor' object.get_flow_id %}"}
+                                ={object.get_flow_name}
+
+                      %td.value-icon.field_icon
+                        -with object.channellog_set.all.first as log
+                          -if log and not user_org.is_anon
+                            %a{href:"{% url 'channels.channellog_read' log.pk%}"}
+                              {{ object|as_icon }}
+                          -else
+                            {{ object|as_icon }}
+
+                      %td.value-received.field_received
+                        %nobr
+                          {{ object.created_on|gmail_time }}
+                    -empty
+                      %tr
+                        %td{colspan:3}
+                          -trans "No matching messages."
+
+              - block paginator
+                -if object_list.count
+                  .paginator
+                    -include "smartmin/sidebar_pagination.haml"
+          -else
+            -include "msgs/empty_include.html"
+
+-block post-content
+  - if org_perms.msgs.broadcast_send
+    -include "msgs/msg_send_modal.haml"
+
+-block extra-script
+  {{ block.super }}
+  :javascript
+    {% if org_perms.msgs.msg_update %}
+
+    function postLabelChanges(smsIds, labelId, addLabel, number, onError) {
+         fetchPJAXContent("", "#pjax", { postData: { objects: smsIds, label: labelId, add: addLabel, action: 'label', pjax: 'true', number:number },
+         forceReload: true, onSuccess: function(data, textStatus) {
+
+           // if there is a live modal, hide it
+           var modal = $("#active-modal");
+           if ((modal).is(":visible")) {
+             modal.data('object').dismiss();
+           }
+
+           $("#pjax").html(data);
+           recheckIds();
+         }, onError: onError});
+    }
+
+    {% endif %}
+
+    $('.page-content').on('click', ".add-label", function() {
+      lastChecked = getCheckedIds();
+      var modal = new Modax('{% trans "Create Label" %}', '{% url "msgs.label_create" %}');
+      modal.setIcon('icon-tag');
+      modal.setListeners({
+        onFormLoaded: function(){
+          $("#active-modal form input#id_messages").val(lastChecked.join());
+          if ($('#id_folder').find('option').length > 1) {
+            select2div('#id_folder');
+          } else {
+            $('#id_folder').parents('.control-group').hide();
+          }
+        }, onCompleted: function() { refresh(function() { recheckIds(); }, true);}
+      });
+
+      modal.show();
+    });
+
+    $('.page-content').on('click', ".add-folder", function() {
+      var modal = new Modax('{% trans "Create Folder" %}', '{% url "msgs.label_create_folder" %}');
+      modal.setIcon('icon-folder');
+      modal.setListeners({
+        onCompleted: function() { refresh(null, true);}
+      });
+      modal.show();
+    });
+
+    {% if org_perms.msgs.broadcast_send %}
+    if($(location).attr('hash') == '#message') {
+      showCompose();
+    }
+
+    $(".page-content").on('click', ".send-button", function() {
+      var smsIds = getCheckedIds();
+      if (smsIds.length > 0) {
+      showComposeInitialized("m=" + smsIds);
+      } else {
+      showCompose();
+      }
+    });
+    {% endif %}
+
+    $(".page-content").on('pjax:complete', function() {
+      $(".btn").tooltip();
+      bindRefreshBlock();
+    });
+
+    $('.select-row').live('mouseover', function(){
+      url = '/contact/read/' + $(this).data('sender-uuid');
+
+      $(this).find('td').not(':first-child').each(function(){
+        $(this).attr('onClick', "document.location.href=url;");
+      });
+    });
+
+    $(document).on('click', 'td.object-row-checkbox', function() {
+      $('.search-details').hide();
+    });
+
+    {% if org_perms.msgs.msg_export %}
+    $('.page-content').on('click', ".msg-export-btn", function() {
+      lastChecked = getCheckedIds();
+      {% if current_label %}
+      var modal = new Modax('{% trans "Export Label Messages" %}', '{% url "msgs.msg_export" %}?label={{current_label.pk}}');
+      {% else %}
+      var modal = new Modax('{% trans "Export Messages" %}', '{% url "msgs.msg_export" %}');
+      {% endif %}
+      modal.setIcon('icon-excel');
+      modal.setRedirectOnSuccess(true);
+      modal.show();
+    });
+    {% endif %}

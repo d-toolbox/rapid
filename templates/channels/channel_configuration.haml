@@ -1,0 +1,782 @@
+-extends "smartmin/read.haml"
+-load i18n channels
+
+-block title
+  .medium-help.float-left{class:'{{object|channel_icon}}'}
+  %h2.font_normalize.header-margin.title
+    {{ object.get_channel_type_display }} Configuration
+
+    .number
+      {{ object.get_address_display }}
+      -if object.get_country_display
+        ({{ object.get_country_display }})
+
+      -if object.channel_type == 'A'
+        \- {{ channel.device }}
+        -if channel.os
+          (v{{channel.os}})
+
+-block content
+  -if object.channel_type == 'AT'
+    %h4
+      -blocktrans
+        To finish configuring your Africa's Talking connection you'll need to set the following callback URLs on the
+        Africa's Talking website under your account.
+
+    .clearfix
+      .config-value
+        .name
+          -trans "Username:"
+        .value {{ object.config_json.username }}
+      .config-value
+        .name
+          -trans "API Key:"
+        .value {{ object.config_json.api_key }}
+
+    .clearfix
+    %hr
+
+    %h4
+      -trans "Callback URL"
+
+    %p
+      -blocktrans
+        You can set the callback URL on your Africa's Talking account by visiting the SMS Dashboard page, then clicking on
+        <a href="http://www.africastalking.com/account/sms/smscallback" target="africastalking">Callback URL</a>.
+
+    %code
+      https://{{ domain }}{% url 'handlers.africas_talking_handler' 'callback' object.uuid %}
+
+    %hr
+
+    %h4 
+      -trans "Delivery URL"
+
+    %p
+      -trans "You can set the delivery URL on your Africa's Talking account by visiting the SMS Dashboard page, then clicking on"
+      <a href="http://www.africastalking.com/account/sms/dlrcallback" target="africastalking">Delivery Reports</a>.
+
+    %code
+      https://{{ domain }}{% url 'handlers.africas_talking_handler' 'delivery' object.uuid %}
+
+    %hr
+
+  -elif object.channel_type == 'CT'
+    %h4
+      -blocktrans
+        To finish configuring your Clickatell connection you'll need to set the following callback URLs on the
+        Clickatell website under your account.
+
+    %h4
+      -trans "Primary Callback URL"
+
+    %p
+      -blocktrans
+        You can set the callback URL on your Clickatell account by managing your two way number, then setting your reply
+        path to HTTP GET and your target address to the URL below. (leave username and password blank)
+
+    %code
+      https://{{ domain }}{% url 'handlers.clickatell_handler' 'receive' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "Message Delivery Notifications URL"
+
+    %p
+      -blocktrans
+        To receive updated statuses on the messages you send you need to edit your HTTP API endpoint on your Clickatell
+        account and set the message delivery notifications to the URL below. (pick HTTP Get as the Method)
+
+    %code
+      https://{{ domain }}{% url 'handlers.clickatell_handler' 'status' object.uuid %}
+
+    %hr
+
+
+  -elif object.channel_type == 'SQ'
+    %h4
+      -blocktrans with number=channel.address
+        To finish configuring your Shaqodoon connection you'll need to provide Shaqodoon with the following delivery
+        URL for incoming messages to {{ number }}.
+
+    %code
+      https://{{ domain }}{% url 'handlers.shaqodoon_handler' 'received' object.uuid %}
+
+    %hr
+
+  -elif object.channel_type == 'ZV'
+    %h4
+      -trans "To finish configuring your Zenvia connection you'll need to set the following callback URLs on your Zenvia account."
+
+    .clearfix
+      .config-value
+        .name
+          -trans "Account:"
+        .value {{ object.config_json.account }}
+      .config-value
+        .name
+          -trans "Code:"
+        .value {{ object.config_json.code }}
+
+    .clearfix
+    %hr
+
+    %h4
+      -trans "Status URL"
+
+    %p
+      -blocktrans
+        To receive delivery and acknowledgement of sent messages, you need to set the status URL
+        for your Zenvia account.
+
+    %code
+      https://{{ domain }}{% url 'handlers.zenvia_handler' 'status' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "Receive URL"
+
+    %p
+      -trans "To receive incoming messages, you need to set the receive URL for your Zenvia account."
+
+    %code
+      https://{{ domain }}{% url 'handlers.zenvia_handler' 'receive' object.uuid %}
+
+    %hr
+
+  -elif object.channel_type == 'NX'
+    %h4
+      -trans "Your Nexmo configuration URLs are as follows. These should have been set up automatically when claiming your number, but if not you can set them from your Nexmo dashboard."
+
+    %h4
+      -trans "Callback URL for Inbound Messages"
+
+    %p
+      -blocktrans
+        The callback URL is called by Nexmo when you receive new incoming messages.
+
+    %code
+      https://{{ domain }}{% url 'handlers.nexmo_handler' 'receive' object.org.nexmo_uuid %}
+
+    %h4
+      -trans "Callback URL for Delivery Receipt"
+
+    %p
+      -blocktrans
+        The delivery URL is called by Nexmo when a message is successfully delivered to a recipient.
+
+    %code
+      https://{{ domain }}{% url 'handlers.nexmo_handler' 'status' object.org.nexmo_uuid %}
+
+
+  -elif object.channel_type == 'IB'
+    %h4
+      -blocktrans
+        To finish configuring your Infobip connection you'll need to set the following callback URLs on the
+        Infobip website under your account.
+
+    .clearfix
+      .config-value
+        .name
+          -trans "Username:"
+        .value {{ object.config_json.username }}
+      .config-value
+        .name
+          -trans "Password:"
+        .value
+          xxxxxxxx
+
+    .clearfix
+    %hr
+
+    %h4
+      -trans "Received URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Infobip when new messages are received to your number. You can set the receive URL on your Infobip account by contacting your sales agent.
+
+    %code
+      https://{{ domain }}{% url 'handlers.infobip_handler' 'received' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "Delivered URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Infobip when a message has been to the final recipient. (delivery reports)
+        You can set the delivery callback URL on your Infobip account by contacting your sales agent.
+
+    %code
+      https://{{ domain }}{% url 'handlers.infobip_handler' 'delivered' object.uuid %}
+
+  -elif object.channel_type == 'BM'
+    %h4
+      -blocktrans
+        To finish configuring your Blackmyna connection you'll need to notify Blackmyna of the following URLs.
+
+    %hr
+
+    %h4
+      -trans "Inbound URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Blackmyna when new messages are received to your number.
+
+    %code
+      https://{{ domain }}{% url 'handlers.blackmyna_handler' 'receive' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "DLR URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Blackmyna when the message status changes. (delivery reports)
+
+    %code
+      https://{{ domain }}{% url 'handlers.blackmyna_handler' 'status' object.uuid %}
+
+  -elif object.channel_type == 'TMS'
+    %h4
+      -blocktrans
+        To finish configuring your Twilio Messaging Service connection you'll need to add the following URL in your Messaging Service Inbound Settings.
+
+    %hr
+
+    %h4
+      -trans "Request URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Twilio when new messages are received by your Messaging Service.
+
+    %code
+      https://{{ domain }}{% url 'handlers.twilio_messaging_service_handler' 'receive' object.uuid %}
+
+    %hr
+
+  -elif object.channel_type == 'SC'
+    %h4
+      -blocktrans
+        To finish configuring your SMSCentral connection you'll need to notify SMSCentral of the following URL.
+
+    %hr
+
+    %h4
+      -trans "Inbound URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by SMSCentral when new messages are received to your number.
+
+    %code
+      https://{{ domain }}{% url 'handlers.smscentral_handler' 'receive' object.uuid %}
+
+  -elif object.channel_type == 'ST'
+    %h4
+      -blocktrans
+        To finish configuring your Start connection you'll need to notify Start of the following receiving URL.
+
+    %hr
+
+    %h4
+      -trans "Inbound URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Start when new messages are received to your number.
+
+    %code
+      https://{{ domain }}{% url 'handlers.start_handler' 'receive' object.uuid %}
+
+  -elif object.channel_type == 'M3'
+    %h4
+      -blocktrans
+        To finish configuring your connection you'll need to notify M3Tech of the following callback URLs:
+
+    %h4
+      -trans "Received URL"
+    %code
+      https://{{ domain }}{% url 'handlers.m3tech_handler' 'received' object.uuid %}
+
+    %p
+      -blocktrans
+        When a new message is received by M3Tech, it should notify us with a POST to the following URL, passing
+        the following parameters: 'from' and 'text'
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.m3tech_handler' 'received' object.uuid %}
+        from=%2B250788123123&text=Love+is+patient.+Love+is+kind.
+    %hr
+
+    %h4
+      -trans "Sent URL"
+    %code
+      https://{{ domain }}{% url 'handlers.m3tech_handler' 'sent' object.uuid %}
+
+    %p
+      -blocktrans
+        When M3Tech successfully sends a message, it should notify us with a POST to the following URL, passing
+        the id of the message as the parameter 'id' (reporting sent messages is optional)
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.m3tech_handler' 'sent' object.uuid %}
+        id=2599235
+    %hr
+
+    %h4
+      -trans "Delivered URL"
+    %code
+      https://{{ domain }}{% url 'handlers.m3tech_handler' 'delivered' object.uuid %}
+
+    %p
+      -blocktrans
+        When M3Tech successfully delivers a message, it should notify us with a POST to the following URL, passing
+        the id of the message as the parameter 'id' (reporting deliveries is optional)
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.m3tech_handler' 'delivered' object.uuid %}
+        id=2599235
+    %hr
+
+    %h4
+      -trans "Failed URL"
+    %code
+      https://{{ domain }}{% url 'handlers.m3tech_handler' 'failed' object.uuid %}
+
+    %p
+      -blocktrans
+        If M3Tech fails to send an outgoing message, it should notify us with a POST to the following URL, passing
+        the id of the message as the parameter 'id' (reporting failed sends is optional)
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.m3tech_handler' 'failed' object.uuid %}
+        id=2599235
+    %hr
+
+  -elif object.channel_type == 'H9'
+    %h4
+      -blocktrans
+        To finish configuring your Hub9 connection you'll need to provide them with the following details.
+
+    .clearfix
+      .config-value
+        .name
+          -trans "Username:"
+        .value {{ object.config_json.username }}
+      .config-value
+        .name
+          -trans "Password:"
+        .value
+          xxxxxxxx
+
+    .clearfix
+    %hr
+
+    %h4
+      -trans "Received URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Hub9 when new messages are received to your number. You can set the receive URL on your Hub9 account by contacting your sales agent.
+
+    %code
+      https://{{ domain }}{% url 'handlers.hub9_handler' 'received' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "Delivered URL"
+
+    %p
+      -blocktrans
+        This endpoint should be called by Hub9 when a message has been to the final recipient. (delivery reports)
+        You can set the delivery callback URL on your Infobip account by contacting your sales agent.
+
+    %code
+      https://{{ domain }}{% url 'handlers.hub9_handler' 'delivered' object.uuid %}
+
+  -elif object.channel_type == 'VM'
+    %h4
+      -blocktrans
+        To finish configuring your Vumi connection you'll need to set the following parameters on your Vumi conversation:
+
+    .clearfix
+      .config-value
+        .name
+          -trans "Conversation Key:"
+        .value
+          {{ object.config_json.conversation_key }}
+
+      .config-value
+        .name
+          -trans "Account Key:"
+        .value
+          {{ object.config_json.account_key }}
+
+    .clearfix
+
+    %hr
+
+    %h4
+      -trans "API Token"
+
+    %p
+      -blocktrans
+        This token is used to authenticate with your Vumi account, set it by editing the "Content" page on your conversation.
+
+    %code
+      {{ object.config_json.access_token }}
+
+    %hr
+
+    %h4
+      -trans "Push Message URL"
+
+    %p
+      -blocktrans
+        This endpoint will be called by Vumi when new messages are received to your number.
+
+    %code
+      https://{{ domain }}{% url 'handlers.vumi_handler' 'receive' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "Push Event URL"
+
+    %p
+      -blocktrans
+        This endpoint will be called by Vumi when sent messages are sent or delivered.
+
+    %code
+      https://{{ domain }}{% url 'handlers.vumi_handler' 'event' object.uuid %}
+
+  -elif object.channel_type == 'KN'
+    %h4
+      -blocktrans
+        As a last step you'll need to configure Kannel to send and receive messages. Here is a stanza you
+        can add to your Kannel configuration to enable sending and receiving.
+
+    %b
+      -trans "Make sure to change the forced-smsc and default-smsc values to the appropriate values for your configuration."
+
+    :markdown
+      &nbsp;
+
+          ######################################################################
+          # {{channel.address}} - {{user_org.name}}
+          ######################################################################
+
+          group = sendsms-user
+          username = "{{channel.config_json.username}}"
+          password = "{{channel.config_json.password}}"
+          concatenation = true
+          max-messages = 10
+          user-allow-ip = "*.*.*.*"
+          faked-sender = {{channel.address}}
+          forced-smsc = YOUR-SMSC
+          default-smsc = YOUR-SMSC
+
+          group = sms-service
+          keyword = default
+          allowed-receiver-prefix = {{channel.address}}
+          max-messages = 0
+          post-url = "https://{{domain}}{% url 'handlers.kannel_handler' 'receive' object.uuid %}/?backend=%i&sender=%p&message=%b&ts=%T&id=%I"
+          concatenation = true
+          assume-plain-text = true
+          accept-x-kannel-headers = true
+          omit-empty = true
+          accepted-smsc = YOUR-SMSC
+
+  -elif object.channel_type == 'JS'
+    %h4
+      -blocktrans
+        As a last step you'll need to configure Jasmin to call the following URL for MO (incoming) messages.
+
+    %hr
+
+    %h4
+      -trans "Push Message URL"
+
+    %p
+      -blocktrans
+        This endpoint will be called by Jasmin when new messages are received to your number, it must be configured
+        to be called as a POST
+
+    %code
+      https://{{ domain }}{% url 'handlers.jasmin_handler' 'receive' object.uuid %}
+
+  -elif object.channel_type == 'MB'
+    %h4
+      -blocktrans
+        As a last step you'll need to set the following callback URL on your Mblox account:
+
+    %hr
+
+    %h4
+      -trans "Callback URL"
+
+    %p
+      -blocktrans
+        This endpoint will be called by Mblox when new messages are received to your number and for delivery reports.
+
+    %code
+      https://{{ domain }}{% url 'handlers.mblox_handler' object.uuid %}
+
+  -elif object.channel_type == 'VB'
+    %h4
+      -blocktrans
+        To finish configuring your connection you'll need to set the following status callback URL for your Verboice project
+
+    %hr
+
+    %h4
+      -trans "Status Callback URL"
+
+    %code
+      https://{{ domain }}{% url 'handlers.verboice_handler' 'status' object.uuid %}
+
+  -elif object.channel_type == 'FB'
+    %h4
+      -blocktrans
+        To finish configuring your Facebook connection you'll need to set the following webhook URL on your application
+        page, use the verify token below when updating it. Make sure to check all boxes to subscribe to all incoming
+        Facebook events.
+
+    .important
+      %p
+        -blocktrans
+          It may take up to ten minutes for a new webhook to take effect after being set on your Facebook application. Remember,
+          until your Facebook application is approved by Facebook you will only be able to send and receive messages
+          with administrators of your application.
+
+    %hr
+
+    %h4
+      -trans "Webhook URL"
+
+    %code
+      https://{{ domain }}{% url 'handlers.facebook_handler' object.uuid %}
+
+    %h4
+      -trans "Verify Token"
+
+    %code
+      {{ channel.secret }}
+
+  -elif object.channel_type == 'HX'
+    %h4
+      -blocktrans
+        To finish configuring your connection you'll need to notify HighConnection of the following URL for
+        incoming (MO) messages
+
+    %hr
+
+    %h4
+      -trans "Receive URL"
+
+    %code
+      https://{{ domain }}{% url 'handlers.hcnx_handler' 'receive' object.uuid %}
+
+  -elif object.channel_type == 'YO'
+    %h4
+      -blocktrans
+        To finish configuring your Yo! connection you'll need to notify Yo! of the following inbound SMS URL.
+
+    %h4
+      -trans "Inbound SMS URL"
+
+    %p
+      -blocktrans
+        This URL should be called with a GET by Yo! when new incoming messages are received on your shortcode.
+
+    %code
+      https://{{ domain }}{% url 'handlers.yo_handler' 'received' object.uuid %}
+
+  -elif object.channel_type == 'CK'
+    %h4
+      -blocktrans
+        To finish configuring your Chikka connection you need to set the following URLs in your Chikka account API settings.
+
+    %hr
+
+    %h4
+      -trans "Notification Receiver URL"
+
+    %code
+      https://{{ domain }}{% url 'handlers.chikka_handler' object.uuid %}
+
+    %hr
+
+    %h4
+      -trans "Message Receiver URL"
+
+    %code
+      https://{{ domain }}{% url 'handlers.chikka_handler' object.uuid %}
+
+  -elif object.channel_type == 'EX'
+    %h4
+      -blocktrans
+        To finish configuring your connection you'll need to set the following callback URLs on your service or aggregator.
+
+    %hr
+
+    %h4
+      -trans "Send URL"
+      %code
+        {{ object.config_json.send_url }}
+
+    %p
+      -blocktrans
+        When we need to send an outgoing message it will make a
+
+      {{ object.config_json.method|default:"POST" }}
+
+      -blocktrans
+        to this URL with the parameters 'text', 'to', 'from', 'channel' and 'id'
+
+    %h4
+      -trans "Example"
+
+    -if object.config_json.method == "GET"
+
+      %pre.prettyprint.example<
+        :plain
+          {{ object.config_json.method }} {{ example_url }}
+
+    -else
+      %pre.prettyprint.example<
+        :plain
+          {{ object.config_json.method }} {{ example_url }}
+          to=%2B250788123123&from={{ object.address|urlencode }}&channel={{ object.pk }}&id=2599235&text=One+mans+trash+is+another_mans+come+up
+    %hr
+
+    -if object.role != 'S'
+
+      %h4
+        -trans "Received URL"
+        %code
+          https://{{ domain }}{% url 'handlers.external_handler' 'received' object.uuid %}
+
+      %p
+        -blocktrans
+          When a new message is received by your service, it should notify us with a POST to the following URL, passing
+          the following parameters: 'from' and 'text'. Callers can optionally also send a 'date' parameter in ISO-8601
+          (ex: 2012-04-23T18:25:43.511Z) format to specify the time the message was received.
+      %pre.prettyprint.example<
+        :plain
+          POST https://{{ domain }}{% url 'handlers.external_handler' 'received' object.uuid %}
+          from=%2B250788123123&text=Love+is+patient.+Love+is+kind.&date=2012-04-23T18:25:43.511Z
+      %hr
+
+    %h4
+      -trans "Sent URL"
+      %code
+        https://{{ domain }}{% url 'handlers.external_handler' 'sent' object.uuid %}
+
+    %p
+      -blocktrans
+        When your service successfully sends a message, it should notify us with a POST to the following URL, passing
+        the id of the message as the parameter 'id' (reporting sent messages is optional)
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.external_handler' 'sent' object.uuid %}
+        id=2599235
+    %hr
+
+    %h4
+      -trans "Delivered URL"
+      %code
+        https://{{ domain }}{% url 'handlers.external_handler' 'delivered' object.uuid %}
+
+    %p
+      -blocktrans
+        When your service successfully delivers a message, it should notify us with a POST to the following URL, passing
+        the id of the message as the parameter 'id' (reporting deliveries is optional)
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.external_handler' 'delivered' object.uuid %}
+        id=2599235
+    %hr
+
+    %h4
+      -trans "Failed URL"
+      %code
+        https://{{ domain }}{% url 'handlers.external_handler' 'failed' object.uuid %}
+
+    %p
+      -blocktrans
+        If your service fails to send an outgoing message, it should notify us with a POST to the following URL, passing
+        the id of the message as the parameter 'id' (reporting failed sends is optional)
+    %pre.prettyprint.example<
+      :plain
+        POST https://{{ domain }}{% url 'handlers.external_handler' 'failed' object.uuid %}
+        id=2599235
+    %hr
+
+-block extra-script
+  {{ block.super }}
+  <script src="{{ STATIC_URL }}rest_framework/js/prettify-min.js"></script>
+  :javascript
+    $(function(){
+      prettyPrint();
+    });
+
+-block extra-style
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}rest_framework/css/prettify.css"/>
+  :css
+    .config-value {
+      float: left;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      padding-right: 20px;
+      height: 10px;
+    }
+
+    .config-value .name {
+      font-weight: normal;
+      float: left;
+    }
+
+    .config-value .value {
+      float: left;
+      padding-left: 5px;
+    }
+
+    pre.prettyprint {
+      margin-top: 0px;
+      margin-bottom: 0px;
+
+      font-family: monospace;
+      font-size: inherit;
+      white-space: pre;
+      line-height: 110%;
+
+      -webkit-border-radius: 0px;
+      -moz-border-radius: 0px;
+      border-radius: 0px;
+    }
+
+    .important {
+      background-color: #efefef;
+      border: 1px solid #ccc;
+      padding: 10px 10px 0px 10px;
+      margin-bottom: 10px;
+    }
+
+    .device .number {
+      padding-left:5px;
+    }
+
+    .title .number {
+      font-size:20px;
+    }
+
