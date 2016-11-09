@@ -268,6 +268,7 @@ BRANDING = {
     'rapidpro.io': {
         'slug': 'rapidpro',
         'name': 'Dtoolbox-Composite',
+        'dtoolbox': 'Dtoolbox',
         'org': 'DToolbox',
         'styles': ['brands/rapidpro/font/style.css', 'brands/rapidpro/less/style.less'],
         'welcome_topup': 1000,
