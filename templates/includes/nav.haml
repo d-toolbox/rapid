@@ -51,6 +51,13 @@
           .title
             -trans "channels"
 
+  -if org_perms.channels.channel_list or request.user.is_superuser
+    -if not has_outgoing_channel and org_perms.channels.channel_claim
+      %li.nav-orgs
+        %a.icon-nav-orgs{href:"http://104.197.152.226:8000/", class:"{% active request 'channels' %}"}
+          .title
+            -trans "Home"            
+
   -if request.user.is_superuser or perms.auth.user_list
     -if not user_org
       %li.nav-groups
