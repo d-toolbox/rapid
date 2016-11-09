@@ -267,13 +267,13 @@ LOGGING = {
 BRANDING = {
     'rapidpro.io': {
         'slug': 'rapidpro',
-        'name': 'RapidPro',
-        'org': 'UNICEF',
+        'name': 'Dtoolbox-Composite',
+        'org': 'DToolbox',
         'styles': ['brands/rapidpro/font/style.css', 'brands/rapidpro/less/style.less'],
         'welcome_topup': 1000,
-        'email': 'join@rapidpro.io',
-        'support_email': 'support@rapidpro.io',
-        'link': 'https://app.rapidpro.io',
+        'email': 'casrit.ict@gmail.com',
+        'support_email': 'casrit.ict@gmail.com',
+        'link': 'https://www.casrit.org',
         'api_link': 'https://api.rapidpro.io',
         'docs_link': 'http://knowledge.rapidpro.io',
         'domain': 'app.rapidpro.io',
@@ -283,7 +283,7 @@ BRANDING = {
         'allow_signups': True,
         'welcome_packs': [dict(size=5000, name="Demo Account"), dict(size=100000, name="UNICEF Account")],
         'description': _("Visually build nationally scalable mobile applications from anywhere in the world."),
-        'credits': _("Copyright &copy; 2012-2015 UNICEF, Nyaruka. All Rights Reserved.")
+        'credits': _("Copyright &copy; 2016 DToolbox. All Rights Reserved.")
     }
 }
 DEFAULT_BRAND = 'rapidpro.io'

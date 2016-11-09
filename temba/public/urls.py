@@ -13,7 +13,7 @@ sitemaps = {
 }
 
 urlpatterns = patterns('',
-                       (r'^$', IndexView.as_view(), {}, 'public.public_index'),
+                       (r'^$', Welcome.as_view(), {}, 'public.public_welcome'),#IndexView.as_view(), {}, 'public.public_index'),
                        (r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap',
                         {'sitemaps': sitemaps}, 'public.sitemaps'),
                        (r'^blog/$', Blog.as_view(), {}, 'public.public_blog'),
