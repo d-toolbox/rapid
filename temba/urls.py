@@ -8,6 +8,9 @@ from django.conf.urls import include, url
 from django.contrib.auth.models import User, AnonymousUser
 from django.conf import settings
 from temba.channels.views import register, sync
+from django.contrib import admin
+
+
 
 # javascript translation packages
 js_info_dict = {
@@ -16,6 +19,7 @@ js_info_dict = {
 
 urlpatterns = [
     url(r'^', include('temba.public.urls')),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('temba.msgs.urls')),
     url(r'^', include('temba.contacts.urls')),
     url(r'^', include('temba.orgs.urls')),
